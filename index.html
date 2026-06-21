@@ -89,22 +89,88 @@
             50% { transform: scale(1.05); }
             100% { transform: scale(1); }
         }
+
+
+        .exercise-card {
+            border: 3px solid #fbcfe8;
+            background: linear-gradient(135deg, #fff7fb 0%, #ffffff 100%);
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+
+        .exercise-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 28px rgba(236, 72, 153, 0.18);
+        }
+
+        .exercise-card.selected {
+            border-color: #ec4899;
+            box-shadow: 0 0 0 5px rgba(236, 72, 153, 0.16);
+        }
+
+        .sound-pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 9999px;
+            padding: 0.2rem 0.7rem;
+            background: #e0f2fe;
+            color: #0369a1;
+            font-weight: 700;
+            font-size: 0.85rem;
+            margin: 0.1rem;
+        }
     </style>
 </head>
 <body class="h-screen w-screen overflow-hidden flex items-center justify-center p-2 md:p-8 text-slate-800 box-border">
 
     <!-- Start Screen Overlay -->
-    <div id="start-screen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm transition-opacity duration-500">
-        <div class="bg-white rounded-[2rem] p-8 md:p-10 max-w-lg text-center shadow-2xl bounce-anim border-8 border-pink-300 mx-3">
-            <h1 class="text-3xl md:text-4xl font-bold text-pink-500 mb-4">AR เกมฝึกออกเสียง</h1>
-            <p class="text-base md:text-lg text-slate-600 mb-6">
-                พูดคำศัพท์ภาษาอังกฤษให้ถูกต้อง!<br>
-                หากได้คะแนนเกิน 80% รับมงกุฎไปเลย 👑<br>
-                แต่ถ้าตอบผิด ระวังเขาปีศาจนะ 😈
+    <div id="start-screen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm transition-opacity duration-500 overflow-y-auto p-3">
+        <div class="bg-white rounded-[2rem] p-6 md:p-8 max-w-4xl w-full text-center shadow-2xl bounce-anim border-8 border-pink-300 my-6">
+            <h1 class="text-3xl md:text-4xl font-bold text-pink-500 mb-3">AR เกมฝึกออกเสียง</h1>
+            <p class="text-base md:text-lg text-slate-600 mb-5">
+                เลือกแบบฝึกหัด แล้วพูดคำศัพท์ภาษาอังกฤษให้ชัดเจน<br class="hidden md:block">
+                ได้คะแนนเกิน 80% รับมงกุฎ 👑 ถ้าพลาดจะมีเขาปีศาจ 😈
             </p>
-            <p class="text-sm text-red-500 mb-6 bg-red-50 p-3 rounded-xl">
-                * กรุณาอนุญาตให้ใช้งานกล้องและไมโครโฟน
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-left mb-5">
+                <div class="exercise-card selected rounded-3xl p-5" data-exercise="exercise1" role="button" tabindex="0">
+                    <div class="flex items-center justify-between gap-3 mb-2">
+                        <h2 class="text-xl md:text-2xl font-bold text-pink-500">แบบฝึกหัดที่ 1</h2>
+                        <span class="bg-pink-100 text-pink-600 px-3 py-1 rounded-full font-bold text-sm">Animals</span>
+                    </div>
+                    <p class="text-slate-600 mb-3">ฝึกออกเสียงคำศัพท์สัตว์พื้นฐาน 10 คำ</p>
+                    <div class="flex flex-wrap gap-2 text-sm font-medium text-slate-600">
+                        <span class="sound-pill">DOG</span>
+                        <span class="sound-pill">CAT</span>
+                        <span class="sound-pill">BIRD</span>
+                        <span class="sound-pill">FISH</span>
+                        <span class="sound-pill">LION</span>
+                    </div>
+                </div>
+
+                <div class="exercise-card rounded-3xl p-5" data-exercise="exercise2" role="button" tabindex="0">
+                    <div class="flex items-center justify-between gap-3 mb-2">
+                        <h2 class="text-xl md:text-2xl font-bold text-indigo-500">แบบฝึกหัดที่ 2</h2>
+                        <span class="bg-indigo-100 text-indigo-600 px-3 py-1 rounded-full font-bold text-sm">-s / -es</span>
+                    </div>
+                    <p class="text-slate-600 mb-3">ฝึกเสียงท้ายคำ Present Simple: /s/, /z/, /iz/</p>
+                    <div class="text-sm leading-7 text-slate-700">
+                        <span class="sound-pill">/s/ likes, speaks, asks</span>
+                        <span class="sound-pill">/z/ drives, solves, loves, begins</span>
+                        <span class="sound-pill">/iz/ teaches, manages, pronounces</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-amber-50 border border-amber-200 rounded-2xl p-3 text-sm md:text-base text-amber-700 mb-5">
+                ตอนนี้เลือก: <span id="selected-exercise-name" class="font-bold">แบบฝึกหัดที่ 1: คำศัพท์สัตว์</span>
+            </div>
+
+            <p class="text-sm text-red-500 mb-5 bg-red-50 p-3 rounded-xl">
+                * กรุณาอนุญาตให้ใช้งานกล้องและไมโครโฟน และควรเปิดผ่าน HTTPS/GitHub Pages ด้วย Google Chrome
             </p>
+
             <button id="start-btn" class="bg-gradient-to-r from-pink-400 to-rose-500 hover:from-pink-500 hover:to-rose-600 text-white font-bold py-4 px-10 rounded-full text-xl md:text-2xl shadow-lg transition transform hover:scale-105 pulse-anim">
                 เริ่มเล่นเกม!
             </button>
@@ -129,14 +195,18 @@
         <div class="w-full md:w-1/2 flex flex-col gap-3 md:gap-6 flex-1 min-h-0">
 
             <!-- Header Stats -->
-            <div class="glass-panel rounded-2xl md:rounded-3xl p-4 md:p-6 flex justify-between items-center shadow-lg flex-shrink-0">
+            <div class="glass-panel rounded-2xl md:rounded-3xl p-4 md:p-6 grid grid-cols-3 gap-2 items-center shadow-lg flex-shrink-0">
                 <div class="flex flex-col">
-                    <span class="text-slate-500 font-medium text-sm md:text-base">ข้อที่กำลังเล่น</span>
-                    <span class="text-2xl md:text-3xl font-bold text-indigo-600" id="question-number">1 / 10</span>
+                    <span class="text-slate-500 font-medium text-xs md:text-base">ข้อที่กำลังเล่น</span>
+                    <span class="text-xl md:text-3xl font-bold text-indigo-600" id="question-number">1 / 10</span>
+                </div>
+                <div class="text-center min-w-0">
+                    <span class="text-slate-500 font-medium text-xs md:text-base">แบบฝึกหัด</span>
+                    <div class="text-sm md:text-lg font-bold text-slate-700 truncate" id="exercise-title">แบบฝึกหัดที่ 1</div>
                 </div>
                 <div class="flex flex-col text-right">
-                    <span class="text-slate-500 font-medium text-sm md:text-base">คะแนนรวม</span>
-                    <span class="text-2xl md:text-3xl font-bold text-pink-500" id="total-score">0</span>
+                    <span class="text-slate-500 font-medium text-xs md:text-base">คะแนนรวม</span>
+                    <span class="text-xl md:text-3xl font-bold text-pink-500" id="total-score">0</span>
                 </div>
             </div>
 
@@ -152,8 +222,11 @@
                 <div class="text-[3.5rem] md:text-[5rem] lg:text-[7rem] font-black text-slate-800 tracking-wider mb-0 md:mb-2 mt-12 md:mt-16 text-center drop-shadow-md transition-all duration-300 leading-tight" id="word-display">
                     READY
                 </div>
-                <div class="text-base md:text-xl text-slate-500 mb-2 md:mb-8" id="word-thai-translation">
+                <div class="text-base md:text-xl text-slate-500 mb-1" id="word-thai-translation">
                     เตรียมพร้อม
+                </div>
+                <div class="text-sm md:text-lg text-indigo-500 font-bold mb-2 md:mb-8 text-center" id="word-hint">
+                    เลือกแบบฝึกหัดแล้วเริ่มเล่น
                 </div>
 
                 <!-- Voice Meter UI -->
@@ -272,18 +345,45 @@
         };
 
         // --- GAME DATA ---
-        const wordsList = [
-            { en: "DOG", th: "สุนัข" },
-            { en: "CAT", th: "แมว" },
-            { en: "BIRD", th: "นก" },
-            { en: "FISH", th: "ปลา" },
-            { en: "LION", th: "สิงโต" },
-            { en: "BEAR", th: "หมี" },
-            { en: "DUCK", th: "เป็ด" },
-            { en: "FROG", th: "กบ" },
-            { en: "WOLF", th: "หมาป่า" },
-            { en: "SWAN", th: "หงส์" }
-        ];
+        const exercises = {
+            exercise1: {
+                title: "แบบฝึกหัดที่ 1: คำศัพท์สัตว์",
+                shortTitle: "Animals",
+                hint: "ฝึกออกเสียงคำศัพท์สัตว์พื้นฐาน",
+                words: [
+                    { en: "DOG", th: "สุนัข", hint: "พูดคำศัพท์สัตว์ให้ชัดเจน" },
+                    { en: "CAT", th: "แมว", hint: "พูดคำศัพท์สัตว์ให้ชัดเจน" },
+                    { en: "BIRD", th: "นก", hint: "พูดคำศัพท์สัตว์ให้ชัดเจน" },
+                    { en: "FISH", th: "ปลา", hint: "พูดคำศัพท์สัตว์ให้ชัดเจน" },
+                    { en: "LION", th: "สิงโต", hint: "พูดคำศัพท์สัตว์ให้ชัดเจน" },
+                    { en: "BEAR", th: "หมี", hint: "พูดคำศัพท์สัตว์ให้ชัดเจน" },
+                    { en: "DUCK", th: "เป็ด", hint: "พูดคำศัพท์สัตว์ให้ชัดเจน" },
+                    { en: "FROG", th: "กบ", hint: "พูดคำศัพท์สัตว์ให้ชัดเจน" },
+                    { en: "WOLF", th: "หมาป่า", hint: "พูดคำศัพท์สัตว์ให้ชัดเจน" },
+                    { en: "SWAN", th: "หงส์", hint: "พูดคำศัพท์สัตว์ให้ชัดเจน" }
+                ]
+            },
+            exercise2: {
+                title: "แบบฝึกหัดที่ 2: เสียงท้าย -s / -es",
+                shortTitle: "-s / -es",
+                hint: "ฝึกออกเสียงท้ายคำ Present Simple: /s/, /z/, /iz/",
+                words: [
+                    { en: "likes", th: "ชอบ", sound: "/s/", hint: "ลงท้ายเสียง /s/" },
+                    { en: "speaks", th: "พูด", sound: "/s/", hint: "ลงท้ายเสียง /s/" },
+                    { en: "asks", th: "ถาม", sound: "/s/", hint: "ลงท้ายเสียง /s/" },
+                    { en: "drives", th: "ขับรถ", sound: "/z/", hint: "ลงท้ายเสียง /z/" },
+                    { en: "solves", th: "แก้ปัญหา", sound: "/z/", hint: "ลงท้ายเสียง /z/" },
+                    { en: "loves", th: "รัก", sound: "/z/", hint: "ลงท้ายเสียง /z/" },
+                    { en: "begins", th: "เริ่ม", sound: "/z/", hint: "ลงท้ายเสียง /z/" },
+                    { en: "teaches", th: "สอน", sound: "/iz/", hint: "ลงท้ายเสียง /iz/" },
+                    { en: "manages", th: "จัดการ", sound: "/iz/", hint: "ลงท้ายเสียง /iz/" },
+                    { en: "pronounces", th: "ออกเสียง", sound: "/iz/", hint: "ลงท้ายเสียง /iz/" }
+                ]
+            }
+        };
+
+        let selectedExerciseKey = "exercise1";
+        let wordsList = exercises[selectedExerciseKey].words;
 
         // --- GAME STATE ---
         let currentWordIndex = 0;
@@ -296,8 +396,10 @@
         // --- DOM ELEMENTS ---
         const uiQuestionNumber = document.getElementById('question-number');
         const uiTotalScore = document.getElementById('total-score');
+        const uiExerciseTitle = document.getElementById('exercise-title');
         const uiWordDisplay = document.getElementById('word-display');
         const uiWordThai = document.getElementById('word-thai-translation');
+        const uiWordHint = document.getElementById('word-hint');
         const uiStatusBadge = document.getElementById('status-badge');
         const uiMeterBar = document.getElementById('meter-bar');
         const uiMeterText = document.getElementById('meter-status-text');
@@ -532,6 +634,43 @@
             canvasCtx.restore();
         }
 
+
+        // --- EXERCISE SELECTION ---
+        function selectExercise(exerciseKey) {
+            if (!exercises[exerciseKey]) return;
+
+            selectedExerciseKey = exerciseKey;
+            wordsList = exercises[selectedExerciseKey].words;
+
+            document.querySelectorAll('[data-exercise]').forEach((card) => {
+                card.classList.toggle('selected', card.dataset.exercise === exerciseKey);
+            });
+
+            const selectedName = document.getElementById('selected-exercise-name');
+            if (selectedName) {
+                selectedName.innerText = exercises[selectedExerciseKey].title;
+            }
+        }
+
+        document.querySelectorAll('[data-exercise]').forEach((card) => {
+            card.addEventListener('click', () => {
+                sfx.init();
+                sfx.click();
+                selectExercise(card.dataset.exercise);
+            });
+
+            card.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    sfx.init();
+                    sfx.click();
+                    selectExercise(card.dataset.exercise);
+                }
+            });
+        });
+
+        selectExercise(selectedExerciseKey);
+
         // --- GAME LOGIC ---
         document.getElementById('start-btn').addEventListener('click', () => {
             sfx.init();
@@ -548,8 +687,10 @@
         });
 
         function startGame() {
+            wordsList = exercises[selectedExerciseKey].words;
             currentWordIndex = 0;
             score = 0;
+            uiExerciseTitle.innerText = exercises[selectedExerciseKey].shortTitle;
             updateScoreUI();
             nextQuestion();
         }
@@ -566,8 +707,9 @@
             const currentWord = wordsList[currentWordIndex];
 
             uiQuestionNumber.innerText = `${currentWordIndex + 1} / ${wordsList.length}`;
-            uiWordDisplay.innerText = currentWord.en;
-            uiWordThai.innerText = `(${currentWord.th})`;
+            uiWordDisplay.innerText = currentWord.en.toUpperCase();
+            uiWordThai.innerText = currentWord.sound ? `${currentWord.th} • เสียงท้าย ${currentWord.sound}` : `(${currentWord.th})`;
+            uiWordHint.innerText = currentWord.hint || exercises[selectedExerciseKey].hint;
 
             uiWordDisplay.classList.remove('text-green-500', 'text-red-500');
             uiWordDisplay.classList.add('text-slate-800');
@@ -592,206 +734,4 @@
             }, 1000);
         }
 
-        function startListening() {
-            if (!recognition) {
-                showMsgBox("เบราว์เซอร์ไม่รองรับ", "กรุณาใช้ Google Chrome เพื่อใช้งานระบบตรวจจับเสียง");
-                return;
-            }
-
-            gameState = 'listening';
-            updateStatusBadge('🎙️ พูดเลย!', 'bg-yellow-100', 'text-yellow-600', 'border-yellow-200');
-
-            uiMeterText.innerText = "กำลังฟังเสียงของคุณ...";
-            uiMeterText.style.color = "#854d0e";
-            uiMeterBar.style.background = "linear-gradient(90deg, #fef08a, #facc15)";
-            uiMeterBar.style.width = "100%";
-            uiMeterBar.classList.add('pulse-anim');
-
-            try {
-                recognition.start();
-                isListening = true;
-
-                listeningTimeout = setTimeout(() => {
-                    if (isListening) {
-                        recognition.stop();
-                        isListening = false;
-                        processVoiceResult("", 0);
-                    }
-                }, 5000);
-            } catch (e) {
-                console.error("Cannot start recognition", e);
-                isListening = false;
-                processVoiceResult("", 0);
-            }
-        }
-
-        // Calculate string similarity for short words
-        function calculateSimilarityScore(spoken, target, confidence) {
-            spoken = spoken.toLowerCase().replace(/[^a-z]/g, '');
-            target = target.toLowerCase();
-
-            if (!spoken) return 0;
-
-            // Exact Match
-            if (spoken === target) {
-                const safeConfidence = confidence > 0 ? confidence : 0.85;
-                return Math.floor(80 + (safeConfidence * 20));
-            }
-
-            // Partial Match
-            if (spoken.includes(target) || target.includes(spoken)) {
-                return Math.floor(60 + Math.random() * 19);
-            }
-
-            // Character overlap approximation
-            const longer = spoken.length > target.length ? spoken : target;
-            const shorter = spoken.length > target.length ? target : spoken;
-
-            let matchCount = 0;
-            for (let i = 0; i < shorter.length; i++) {
-                if (longer.includes(shorter[i])) {
-                    matchCount++;
-                }
-            }
-
-            const simPercent = (matchCount / longer.length) * 100;
-
-            // Cap wrong/near words at 79%, so they do not pass the 80% threshold
-            return Math.min(79, Math.floor(simPercent));
-        }
-
-        function processVoiceResult(transcript, confidence) {
-            uiMeterBar.classList.remove('pulse-anim');
-            gameState = 'result';
-
-            // No speech: retry the same question
-            if (!transcript || transcript.trim() === "") {
-                sfx.warning();
-
-                uiMeterBar.style.background = "linear-gradient(90deg, #fef08a, #facc15)";
-                uiMeterBar.style.width = "100%";
-                uiMeterText.innerText = "ไม่ได้ยินเสียงเลย ลองพูดใหม่อีกครั้งนะ!";
-                uiMeterText.style.color = "#854d0e";
-                updateStatusBadge('⚠️ ไม่ได้ยินเสียง', 'bg-yellow-100', 'text-yellow-700', 'border-yellow-200');
-
-                setTimeout(() => {
-                    nextQuestion();
-                }, 2500);
-
-                return;
-            }
-
-            const targetWord = wordsList[currentWordIndex].en;
-            let percentage = calculateSimilarityScore(transcript, targetWord, confidence);
-
-            if (percentage > 100) percentage = 100;
-            if (percentage < 0) percentage = 0;
-
-            const isCorrect = percentage >= 80;
-
-            uiMeterPercent.innerText = `${percentage}%`;
-            uiMeterBar.style.width = `${percentage}%`;
-
-            if (isCorrect) {
-                sfx.correct();
-
-                uiMeterBar.style.background = "linear-gradient(90deg, #86efac, #22c55e)";
-                uiMeterText.innerText = `เยี่ยมมาก! (${transcript})`;
-                uiMeterText.style.color = "#14532d";
-                updateStatusBadge('✅ ถูกต้อง!', 'bg-green-100', 'text-green-600', 'border-green-200');
-
-                uiWordDisplay.classList.add('text-green-500');
-
-                score++;
-                updateScoreUI();
-                arState = 'crown';
-                triggerFireworks();
-            } else {
-                sfx.wrong();
-
-                uiMeterBar.style.background = "linear-gradient(90deg, #fca5a5, #ef4444)";
-                uiMeterText.innerText = `คุณพูดว่า "${transcript}"`;
-                uiMeterText.style.color = "#7f1d1d";
-                updateStatusBadge('❌ พยายามใหม่นะ', 'bg-red-100', 'text-red-600', 'border-red-200');
-
-                uiWordDisplay.classList.add('text-red-500');
-
-                arState = 'horns';
-            }
-
-            setTimeout(() => {
-                currentWordIndex++;
-                nextQuestion();
-            }, 3000);
-        }
-
-        // --- UI HELPERS ---
-        function updateScoreUI() {
-            uiTotalScore.innerText = score;
-            uiTotalScore.classList.remove('bounce-anim');
-            void uiTotalScore.offsetWidth;
-            uiTotalScore.classList.add('bounce-anim');
-        }
-
-        function updateStatusBadge(text, bgClass, textClass, borderClass) {
-            uiStatusBadge.className = `absolute top-4 md:top-6 px-4 py-1 md:px-6 md:py-2 rounded-full font-bold text-sm md:text-lg shadow-sm border transition-all duration-300 z-10 ${bgClass} ${textClass} ${borderClass}`;
-            uiStatusBadge.innerText = text;
-        }
-
-        function resetMeterUI() {
-            uiMeterBar.style.width = "0%";
-            uiMeterBar.style.background = "linear-gradient(90deg, #e2e8f0, #cbd5e1)";
-            uiMeterText.innerText = "รอสัญญาณ...";
-            uiMeterText.style.color = "#475569";
-            uiMeterPercent.innerText = "0%";
-        }
-
-        function triggerFireworks() {
-            const duration = 2000;
-            const end = Date.now() + duration;
-
-            (function frame() {
-                confetti({
-                    particleCount: 5,
-                    angle: 60,
-                    spread: 55,
-                    origin: { x: 0 },
-                    colors: ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff']
-                });
-
-                confetti({
-                    particleCount: 5,
-                    angle: 120,
-                    spread: 55,
-                    origin: { x: 1 },
-                    colors: ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff']
-                });
-
-                if (Date.now() < end) {
-                    requestAnimationFrame(frame);
-                }
-            }());
-        }
-
-        function showEndScreen() {
-            gameState = 'end';
-
-            document.getElementById('final-score-text').innerText = `${score}/${wordsList.length}`;
-            document.getElementById('end-screen').classList.remove('hidden');
-            document.getElementById('end-screen').classList.add('flex');
-
-            setTimeout(() => {
-                document.getElementById('end-screen').style.opacity = '1';
-
-                if (score >= 8) {
-                    sfx.fanfare();
-                    triggerFireworks();
-                    setTimeout(triggerFireworks, 1000);
-                } else {
-                    sfx.gameOver();
-                }
-            }, 100);
-        }
-    </script>
-</body>
-</html>
+        funct
