@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Pronunciation /s/ /z/ /iz/</title>
 
     <!-- Tailwind CSS -->
@@ -11,14 +11,25 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Mitr:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <!-- Canvas Confetti for Fireworks -->
+    <!-- Canvas Confetti -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
-    <!-- MediaPipe for Face Tracking -->
+    <!-- MediaPipe FaceMesh -->
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js" crossorigin="anonymous"></script>
 
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            width: 100%;
+            min-height: 100%;
+            margin: 0;
+        }
+
         body {
             font-family: 'Mitr', sans-serif;
             background: linear-gradient(135deg, #ffc3a0 0%, #ffafbd 100%);
@@ -28,8 +39,10 @@
             user-select: none;
         }
 
-        button, .exercise-card {
+        button,
+        [role="button"] {
             touch-action: manipulation;
+            cursor: pointer;
         }
 
         ::-webkit-scrollbar {
@@ -42,8 +55,9 @@
         }
 
         .glass-panel {
-            background: rgba(255, 255, 255, 0.85);
+            background: rgba(255, 255, 255, 0.86);
             backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             border: 4px solid white;
         }
 
@@ -59,8 +73,8 @@
         .meter-fill {
             height: 100%;
             width: 0%;
-            background: linear-gradient(90deg, #fca5a5, #f87171);
-            transition: width 1s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.5s ease;
+            background: linear-gradient(90deg, #e2e8f0, #cbd5e1);
+            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.5s ease;
             border-radius: 9999px;
         }
 
@@ -69,11 +83,12 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
+            width: 94%;
+            text-align: center;
             font-weight: 600;
             color: #334155;
-            text-shadow: 1px 1px 0px white;
+            text-shadow: 1px 1px 0 white;
             white-space: nowrap;
-            max-width: 95%;
             overflow: hidden;
             text-overflow: ellipsis;
         }
@@ -97,93 +112,95 @@
             100% { transform: scale(1); }
         }
 
-
-        .exercise-card {
-            border: 3px solid #fbcfe8;
-            background: linear-gradient(135deg, #fff7fb 0%, #ffffff 100%);
-            cursor: pointer;
-            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-        }
-
-        .exercise-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 28px rgba(236, 72, 153, 0.18);
-        }
-
-        .exercise-card.selected {
-            border-color: #ec4899;
-            box-shadow: 0 0 0 5px rgba(236, 72, 153, 0.16);
-        }
-
         .sound-pill {
             display: inline-flex;
             align-items: center;
             justify-content: center;
             border-radius: 9999px;
-            padding: 0.2rem 0.7rem;
+            padding: 0.25rem 0.75rem;
             background: #e0f2fe;
             color: #0369a1;
             font-weight: 700;
-            font-size: 0.85rem;
-            margin: 0.1rem;
+            font-size: 0.9rem;
+            margin: 0.15rem;
+        }
+
+        .safe-area {
+            padding-left: env(safe-area-inset-left);
+            padding-right: env(safe-area-inset-right);
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        @media (max-width: 767px) {
+            body {
+                overflow-y: auto;
+            }
+
+            #game-container {
+                min-height: 100dvh;
+                height: auto;
+            }
+
+            #word-display {
+                font-size: clamp(3rem, 17vw, 5.2rem);
+            }
         }
     </style>
 </head>
-<body class="h-screen w-screen overflow-hidden flex items-center justify-center p-2 md:p-8 text-slate-800 box-border">
+<body class="min-h-screen w-screen flex items-center justify-center p-2 md:p-8 text-slate-800 safe-area">
 
-    <!-- Start Screen Overlay -->
-    <div id="start-screen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm transition-opacity duration-500 overflow-y-auto p-3">
-        <div class="bg-white rounded-[2rem] p-6 md:p-8 max-w-4xl w-full text-center shadow-2xl bounce-anim border-8 border-pink-300 my-6">
-            <h1 class="text-3xl md:text-4xl font-bold text-pink-500 mb-3">Pronunciation /s/ /z/ /iz/</h1>
-            <p class="text-base md:text-lg text-slate-600 mb-5">
+    <!-- Start Screen -->
+    <div id="start-screen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm transition-opacity duration-300 overflow-y-auto p-3 safe-area">
+        <div class="bg-white rounded-[2rem] p-6 md:p-9 max-w-4xl w-full text-center shadow-2xl bounce-anim border-8 border-pink-300 my-6">
+            <h1 class="text-3xl md:text-5xl font-bold text-pink-500 mb-3">Pronunciation /s/ /z/ /iz/</h1>
+            <p class="text-base md:text-xl text-slate-600 mb-5">
                 ฝึกออกเสียงท้ายคำ Present Simple ให้ชัดเจน<br class="hidden md:block">
                 ได้คะแนนเกิน 80% รับมงกุฎ 👑 ถ้าพลาดจะมีเขาปีศาจ 😈
             </p>
 
-            <div class="grid grid-cols-1 gap-4 text-left mb-5">
-                <div class="exercise-card selected rounded-3xl p-5" data-exercise="exercise2" role="button" tabindex="0">
-                    <div class="flex items-center justify-between gap-3 mb-2">
-                        <h2 class="text-xl md:text-2xl font-bold text-indigo-500">Pronunciation /s/ /z/ /iz/</h2>
-                        <span class="bg-indigo-100 text-indigo-600 px-3 py-1 rounded-full font-bold text-sm">-s / -es</span>
-                    </div>
-                    <p class="text-slate-600 mb-3">ฝึกเสียงท้ายคำ Present Simple: /s/, /z/, /iz/</p>
-                    <div class="text-sm leading-7 text-slate-700">
-                        <span class="sound-pill">/s/ likes, speaks, asks</span>
-                        <span class="sound-pill">/z/ drives, solves, loves, begins</span>
-                        <span class="sound-pill">/iz/ teaches, manages, pronounces</span>
-                    </div>
+            <div class="rounded-3xl p-5 text-left mb-5 border-4 border-indigo-100 bg-gradient-to-br from-indigo-50 to-white shadow-sm">
+                <div class="flex items-center justify-between gap-3 mb-2">
+                    <h2 class="text-xl md:text-2xl font-bold text-indigo-500">แบบฝึกหัด: Pronunciation /s/ /z/ /iz/</h2>
+                    <span class="bg-indigo-100 text-indigo-600 px-3 py-1 rounded-full font-bold text-sm">-s / -es</span>
+                </div>
+                <p class="text-slate-600 mb-3">ฝึกเสียงท้ายคำ Present Simple: /s/, /z/, /iz/</p>
+                <div class="text-sm leading-8 text-slate-700">
+                    <span class="sound-pill">/s/ likes, speaks, asks</span>
+                    <span class="sound-pill">/z/ drives, solves, loves, begins</span>
+                    <span class="sound-pill">/iz/ teaches, manages, pronounces</span>
                 </div>
             </div>
 
             <p class="text-sm text-red-500 mb-3 bg-red-50 p-3 rounded-xl">
-                * กรุณาอนุญาตให้ใช้งานกล้องและไมโครโฟน และควรเปิดผ่าน HTTPS/GitHub Pages ด้วย Safari หรือ Chrome
+                * กรุณาอนุญาตให้ใช้งานกล้องและไมโครโฟน เปิดผ่าน HTTPS/GitHub Pages เท่านั้น
             </p>
 
             <p id="speech-support-note" class="hidden text-sm text-amber-700 mb-5 bg-amber-50 p-3 rounded-xl border border-amber-200">
-                อุปกรณ์นี้อาจไม่รองรับการตรวจเสียงอัตโนมัติ ระบบจะเปิดโหมด iPad ให้กดให้คะแนนเองแทน
+                ตรวจพบ iPad/iPhone หรือเบราว์เซอร์ที่ไม่รองรับการตรวจเสียงอัตโนมัติ ระบบจะใช้โหมดกดให้คะแนนเอง เพื่อไม่ให้เกมค้าง
             </p>
 
-            <button id="start-btn" type="button" class="bg-gradient-to-r from-pink-400 to-rose-500 hover:from-pink-500 hover:to-rose-600 text-white font-bold py-4 px-10 rounded-full text-xl md:text-2xl shadow-lg transition transform hover:scale-105 pulse-anim">
+            <button id="start-btn" type="button" class="bg-gradient-to-r from-pink-400 to-rose-500 hover:from-pink-500 hover:to-rose-600 active:scale-95 text-white font-bold py-4 px-10 rounded-full text-xl md:text-2xl shadow-lg transition transform hover:scale-105 pulse-anim">
                 เริ่มเล่นเกม!
             </button>
         </div>
     </div>
 
-    <!-- Message Box Overlay -->
-    <div id="msg-box" class="fixed inset-0 z-[60] hidden items-center justify-center bg-black/50 backdrop-blur-sm p-3">
+    <!-- Message Box -->
+    <div id="msg-box" class="fixed inset-0 z-[60] hidden items-center justify-center bg-black/50 backdrop-blur-sm p-3 safe-area">
         <div class="bg-white rounded-3xl p-8 max-w-md text-center shadow-2xl">
             <h2 id="msg-title" class="text-2xl font-bold text-slate-800 mb-4">ข้อความ</h2>
             <p id="msg-text" class="text-lg text-slate-600 mb-6">รายละเอียด</p>
-            <button onclick="closeMsgBox()" class="bg-slate-800 hover:bg-slate-700 text-white font-bold py-2 px-8 rounded-full text-lg shadow-md transition">
+            <button id="msg-ok-btn" type="button" class="bg-slate-800 hover:bg-slate-700 active:scale-95 text-white font-bold py-2 px-8 rounded-full text-lg shadow-md transition">
                 ตกลง
             </button>
         </div>
     </div>
 
     <!-- Main Game Container -->
-    <div class="w-full h-full max-w-[1500px] flex flex-col md:flex-row gap-3 md:gap-6 opacity-0 transition-opacity duration-1000" id="game-container">
+    <div class="w-full h-[calc(100dvh-1rem)] max-w-[1500px] flex flex-col md:flex-row gap-3 md:gap-6 opacity-0 transition-opacity duration-500" id="game-container">
 
-        <!-- Left Side: Game UI -->
+        <!-- Left Side -->
         <div class="w-full md:w-1/2 flex flex-col gap-3 md:gap-6 flex-1 min-h-0">
 
             <!-- Header Stats -->
@@ -203,25 +220,22 @@
             </div>
 
             <!-- Question Card -->
-            <div class="glass-panel rounded-2xl md:rounded-3xl p-5 md:p-10 flex flex-col items-center justify-center shadow-lg flex-1 relative min-h-0">
+            <div class="glass-panel rounded-2xl md:rounded-3xl p-5 md:p-10 flex flex-col items-center justify-center shadow-lg flex-1 relative min-h-[390px] md:min-h-0">
 
-                <!-- Status & Countdown -->
                 <div id="status-badge" class="absolute top-4 md:top-6 px-4 py-1 md:px-6 md:py-2 rounded-full bg-blue-100 text-blue-600 font-bold text-sm md:text-lg shadow-sm border border-blue-200 transition-all duration-300 z-10">
                     เตรียมตัว...
                 </div>
 
-                <!-- Word Display -->
                 <div class="text-[3.5rem] md:text-[5rem] lg:text-[7rem] font-black text-slate-800 tracking-wider mb-0 md:mb-2 mt-12 md:mt-16 text-center drop-shadow-md transition-all duration-300 leading-tight" id="word-display">
                     READY
                 </div>
-                <div class="text-base md:text-xl text-slate-500 mb-1" id="word-thai-translation">
+                <div class="text-base md:text-xl text-slate-500 mb-1 text-center" id="word-thai-translation">
                     เตรียมพร้อม
                 </div>
                 <div class="text-sm md:text-lg text-indigo-500 font-bold mb-2 md:mb-8 text-center" id="word-hint">
                     กดเริ่มเล่นเพื่อฝึกเสียงท้าย /s/ /z/ /iz/
                 </div>
 
-                <!-- Voice Meter UI -->
                 <div class="w-full max-w-md mt-auto flex-shrink-0">
                     <div class="flex justify-between text-xs md:text-sm font-bold text-slate-500 mb-1 md:mb-2">
                         <span>ความแม่นยำ</span>
@@ -233,10 +247,10 @@
                     </div>
 
                     <div id="manual-controls" class="hidden grid grid-cols-2 gap-3 mt-4">
-                        <button id="manual-correct-btn" type="button" class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-2xl shadow-lg text-sm md:text-base">
+                        <button id="manual-correct-btn" type="button" class="bg-green-500 hover:bg-green-600 active:scale-95 text-white font-bold py-3 px-4 rounded-2xl shadow-lg text-sm md:text-base">
                             ถูกต้อง ✅
                         </button>
-                        <button id="manual-wrong-btn" type="button" class="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-4 rounded-2xl shadow-lg text-sm md:text-base">
+                        <button id="manual-wrong-btn" type="button" class="bg-red-500 hover:bg-red-600 active:scale-95 text-white font-bold py-3 px-4 rounded-2xl shadow-lg text-sm md:text-base">
                             ยังไม่ผ่าน ❌
                         </button>
                     </div>
@@ -246,22 +260,19 @@
         </div>
 
         <!-- Right Side: AR Camera -->
-        <div class="w-full md:w-1/2 flex flex-col justify-center items-center flex-1 min-h-0">
+        <div class="w-full md:w-1/2 flex flex-col justify-center items-center flex-1 min-h-[300px] md:min-h-0">
             <div class="glass-panel rounded-[1.5rem] md:rounded-[2rem] p-2 md:p-4 shadow-xl w-full h-full flex flex-col min-h-0">
-                <!-- Video Element (Hidden, used for MediaPipe) -->
                 <video id="input_video" class="hidden" autoplay playsinline muted></video>
 
-                <!-- Canvas Element (Visible to user) -->
-                <div id="webcam-container" class="w-full h-full relative rounded-xl md:rounded-[1.5rem] overflow-hidden bg-slate-800 border-[3px] md:border-[6px] border-white flex-1 min-h-0 shadow-[inset_0_2px_10px_rgba(0,0,0,0.3)]">
+                <div id="webcam-container" class="w-full h-full relative rounded-xl md:rounded-[1.5rem] overflow-hidden bg-slate-800 border-[3px] md:border-[6px] border-white flex-1 min-h-[280px] md:min-h-0 shadow-[inset_0_2px_10px_rgba(0,0,0,0.3)]">
                     <canvas id="output_canvas" class="absolute top-0 left-0 w-full h-full object-cover transform scale-x-[-1]"></canvas>
 
-                    <!-- Loading overlay for camera -->
-                    <div id="cam-loading" class="absolute inset-0 flex flex-col items-center justify-center bg-slate-800 text-white z-10">
+                    <div id="cam-loading" class="absolute inset-0 flex flex-col items-center justify-center bg-slate-800 text-white z-10 p-4 text-center">
                         <svg class="animate-spin h-8 w-8 md:h-10 md:w-10 text-pink-500 mb-3 md:mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
-                        <p class="font-medium text-sm md:text-lg">กำลังเปิดกล้องและ AI...</p>
+                        <p id="cam-loading-text" class="font-medium text-sm md:text-lg">กดเริ่มเกมเพื่อเปิดกล้อง</p>
                     </div>
                 </div>
             </div>
@@ -270,269 +281,360 @@
     </div>
 
     <!-- Final Score Screen -->
-    <div id="end-screen" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-md transition-opacity duration-500 p-3">
+    <div id="end-screen" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-md transition-opacity duration-500 p-3 safe-area">
         <div class="bg-white rounded-[3rem] p-8 md:p-12 max-w-xl text-center shadow-[0_0_50px_rgba(236,72,153,0.5)] border-8 border-pink-400">
             <h1 class="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-orange-400 mb-4">สรุปผลคะแนน!</h1>
             <p class="text-xl md:text-2xl text-slate-600 mb-8">คุณออกเสียงถูกต้องไปทั้งหมด</p>
             <div class="text-[6rem] md:text-[8rem] font-black text-indigo-600 leading-none mb-8 drop-shadow-lg" id="final-score-text">
                 0/10
             </div>
-            <button onclick="sfx.click(); setTimeout(() => location.reload(), 300);" class="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-bold py-4 px-12 rounded-full text-xl md:text-2xl shadow-xl transition transform hover:scale-105">
+            <button id="restart-btn" type="button" class="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 active:scale-95 text-white font-bold py-4 px-10 md:px-12 rounded-full text-xl md:text-2xl shadow-xl transition transform hover:scale-105">
                 เล่นใหม่อีกครั้ง
             </button>
         </div>
     </div>
 
     <script>
-        // --- SOUND EFFECTS (Web Audio API Synthesizer) ---
-        let audioCtx;
+        // ------------------------------
+        // Safe helpers
+        // ------------------------------
+        const $ = (id) => document.getElementById(id);
+
+        function isIOSDevice() {
+            const ua = navigator.userAgent || navigator.vendor || window.opera || "";
+            const iPadOS13Up = navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
+            return /iPad|iPhone|iPod/i.test(ua) || iPadOS13Up;
+        }
+
+        // ------------------------------
+        // Sound effects
+        // ------------------------------
+        let audioCtx = null;
         const sfx = {
-            init: () => {
+            init() {
                 try {
-                    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-                    if (!AudioContextClass) return;
-
-                    if (!audioCtx) {
-                        audioCtx = new AudioContextClass();
-                    }
-
-                    if (audioCtx.state === 'suspended') {
-                        audioCtx.resume().catch(() => {});
-                    }
-                } catch (error) {
-                    console.warn('Audio init skipped:', error);
+                    const AudioClass = window.AudioContext || window.webkitAudioContext;
+                    if (!AudioClass) return;
+                    if (!audioCtx) audioCtx = new AudioClass();
+                    if (audioCtx.state === "suspended") audioCtx.resume().catch(() => {});
+                } catch (err) {
+                    audioCtx = null;
                 }
             },
-            playTone: (freq, type, duration, vol = 0.1, delay = 0) => {
-                if (!audioCtx) return;
-
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-
-                osc.type = type;
-                osc.frequency.setValueAtTime(freq, audioCtx.currentTime + delay);
-
-                gain.gain.setValueAtTime(vol, audioCtx.currentTime + delay);
-                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + delay + duration);
-
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                osc.start(audioCtx.currentTime + delay);
-                osc.stop(audioCtx.currentTime + delay + duration);
+            playTone(freq, type, duration, vol = 0.08, delay = 0) {
+                try {
+                    if (!audioCtx) return;
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = type;
+                    osc.frequency.setValueAtTime(freq, audioCtx.currentTime + delay);
+                    gain.gain.setValueAtTime(vol, audioCtx.currentTime + delay);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + delay + duration);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(audioCtx.currentTime + delay);
+                    osc.stop(audioCtx.currentTime + delay + duration);
+                } catch (err) {}
             },
-            click: () => sfx.playTone(600, 'sine', 0.1),
-            tick: () => sfx.playTone(440, 'triangle', 0.1),
-            go: () => sfx.playTone(880, 'triangle', 0.3),
-            correct: () => {
-                sfx.playTone(523.25, 'sine', 0.1, 0.1, 0);
-                sfx.playTone(659.25, 'sine', 0.1, 0.1, 0.1);
-                sfx.playTone(783.99, 'sine', 0.2, 0.1, 0.2);
-                sfx.playTone(1046.50, 'sine', 0.4, 0.1, 0.3);
+            click() { this.playTone(600, "sine", 0.1); },
+            tick() { this.playTone(440, "triangle", 0.1); },
+            go() { this.playTone(880, "triangle", 0.25); },
+            correct() {
+                this.playTone(523.25, "sine", 0.1, 0.08, 0);
+                this.playTone(659.25, "sine", 0.1, 0.08, 0.1);
+                this.playTone(783.99, "sine", 0.2, 0.08, 0.2);
+                this.playTone(1046.50, "sine", 0.35, 0.08, 0.3);
             },
-            wrong: () => {
-                sfx.playTone(300, 'sawtooth', 0.3, 0.1, 0);
-                sfx.playTone(250, 'sawtooth', 0.4, 0.1, 0.2);
+            wrong() {
+                this.playTone(300, "sawtooth", 0.3, 0.08, 0);
+                this.playTone(250, "sawtooth", 0.4, 0.08, 0.2);
             },
-            warning: () => {
-                sfx.playTone(400, 'square', 0.2, 0.05, 0);
-                sfx.playTone(400, 'square', 0.2, 0.05, 0.2);
+            warning() {
+                this.playTone(400, "square", 0.2, 0.04, 0);
+                this.playTone(400, "square", 0.2, 0.04, 0.2);
             },
-            fanfare: () => {
-                sfx.playTone(523.25, 'triangle', 0.2, 0.1, 0);
-                sfx.playTone(659.25, 'triangle', 0.2, 0.1, 0.2);
-                sfx.playTone(783.99, 'triangle', 0.2, 0.1, 0.4);
-                sfx.playTone(1046.50, 'triangle', 0.4, 0.1, 0.6);
-                sfx.playTone(783.99, 'triangle', 0.2, 0.1, 1.0);
-                sfx.playTone(1046.50, 'triangle', 0.6, 0.1, 1.2);
+            fanfare() {
+                this.playTone(523.25, "triangle", 0.2, 0.08, 0);
+                this.playTone(659.25, "triangle", 0.2, 0.08, 0.2);
+                this.playTone(783.99, "triangle", 0.2, 0.08, 0.4);
+                this.playTone(1046.50, "triangle", 0.4, 0.08, 0.6);
             },
-            gameOver: () => {
-                sfx.playTone(392.00, 'sawtooth', 0.3, 0.1, 0);
-                sfx.playTone(349.23, 'sawtooth', 0.3, 0.1, 0.3);
-                sfx.playTone(329.63, 'sawtooth', 0.3, 0.1, 0.6);
-                sfx.playTone(261.63, 'sawtooth', 0.8, 0.1, 0.9);
+            gameOver() {
+                this.playTone(392.00, "sawtooth", 0.3, 0.08, 0);
+                this.playTone(349.23, "sawtooth", 0.3, 0.08, 0.3);
+                this.playTone(261.63, "sawtooth", 0.8, 0.08, 0.6);
             }
         };
 
-        // --- GAME DATA ---
-        const exercises = {
-            exercise2: {
-                title: "Pronunciation /s/ /z/ /iz/",
-                shortTitle: "Pronunciation /s/ /z/ /iz/",
-                hint: "ฝึกออกเสียงท้ายคำ Present Simple: /s/, /z/, /iz/",
-                words: [
-                    { en: "likes", th: "ชอบ", sound: "/s/", hint: "ลงท้ายเสียง /s/" },
-                    { en: "speaks", th: "พูด", sound: "/s/", hint: "ลงท้ายเสียง /s/" },
-                    { en: "asks", th: "ถาม", sound: "/s/", hint: "ลงท้ายเสียง /s/" },
-                    { en: "drives", th: "ขับรถ", sound: "/z/", hint: "ลงท้ายเสียง /z/" },
-                    { en: "solves", th: "แก้ปัญหา", sound: "/z/", hint: "ลงท้ายเสียง /z/" },
-                    { en: "loves", th: "รัก", sound: "/z/", hint: "ลงท้ายเสียง /z/" },
-                    { en: "begins", th: "เริ่ม", sound: "/z/", hint: "ลงท้ายเสียง /z/" },
-                    { en: "teaches", th: "สอน", sound: "/iz/", hint: "ลงท้ายเสียง /iz/" },
-                    { en: "manages", th: "จัดการ", sound: "/iz/", hint: "ลงท้ายเสียง /iz/" },
-                    { en: "pronounces", th: "ออกเสียง", sound: "/iz/", hint: "ลงท้ายเสียง /iz/" }
-                ]
-            }
-        };
+        // ------------------------------
+        // Game data
+        // ------------------------------
+        const exerciseTitle = "Pronunciation /s/ /z/ /iz/";
+        const wordsList = [
+            { en: "likes", th: "ชอบ", sound: "/s/", hint: "ลงท้ายเสียง /s/" },
+            { en: "speaks", th: "พูด", sound: "/s/", hint: "ลงท้ายเสียง /s/" },
+            { en: "asks", th: "ถาม", sound: "/s/", hint: "ลงท้ายเสียง /s/" },
+            { en: "drives", th: "ขับรถ", sound: "/z/", hint: "ลงท้ายเสียง /z/" },
+            { en: "solves", th: "แก้ปัญหา", sound: "/z/", hint: "ลงท้ายเสียง /z/" },
+            { en: "loves", th: "รัก", sound: "/z/", hint: "ลงท้ายเสียง /z/" },
+            { en: "begins", th: "เริ่ม", sound: "/z/", hint: "ลงท้ายเสียง /z/" },
+            { en: "teaches", th: "สอน", sound: "/iz/", hint: "ลงท้ายเสียง /iz/" },
+            { en: "manages", th: "จัดการ", sound: "/iz/", hint: "ลงท้ายเสียง /iz/" },
+            { en: "pronounces", th: "ออกเสียง", sound: "/iz/", hint: "ลงท้ายเสียง /iz/" }
+        ];
 
-        let selectedExerciseKey = "exercise2";
-        let wordsList = exercises[selectedExerciseKey].words;
-
-        // --- GAME STATE ---
+        // ------------------------------
+        // State
+        // ------------------------------
         let currentWordIndex = 0;
         let score = 0;
-        let gameState = 'init'; // init, countdown, listening, result, end
-        let arState = 'none'; // none, crown, horns
+        let gameState = "init";
+        let arState = "none";
+        let gameStarted = false;
+        let isListening = false;
+        let listeningTimeout = null;
         let faceTrackingReady = false;
-        let mediapipeCamera = null;
+        let simpleCameraLoop = null;
 
-        // --- DOM ELEMENTS ---
-        const uiQuestionNumber = document.getElementById('question-number');
-        const uiTotalScore = document.getElementById('total-score');
-        const uiExerciseTitle = document.getElementById('exercise-title');
-        const uiWordDisplay = document.getElementById('word-display');
-        const uiWordThai = document.getElementById('word-thai-translation');
-        const uiWordHint = document.getElementById('word-hint');
-        const uiStatusBadge = document.getElementById('status-badge');
-        const uiMeterBar = document.getElementById('meter-bar');
-        const uiMeterText = document.getElementById('meter-status-text');
-        const uiMeterPercent = document.getElementById('meter-percent-text');
-        const manualControls = document.getElementById('manual-controls');
-        const manualCorrectBtn = document.getElementById('manual-correct-btn');
-        const manualWrongBtn = document.getElementById('manual-wrong-btn');
-        const speechSupportNote = document.getElementById('speech-support-note');
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        // iPad/iPhone Web Speech API is unreliable, so use manual mode there to prevent the game from freezing.
+        let manualMode = isIOSDevice() || !SpeechRecognition;
+        let recognition = null;
 
-        const videoElement = document.getElementById('input_video');
-        const canvasElement = document.getElementById('output_canvas');
-        const canvasCtx = canvasElement.getContext('2d');
+        // ------------------------------
+        // DOM
+        // ------------------------------
+        const startScreen = $("start-screen");
+        const gameContainer = $("game-container");
+        const startBtn = $("start-btn");
+        const restartBtn = $("restart-btn");
+        const speechSupportNote = $("speech-support-note");
+        const manualControls = $("manual-controls");
+        const manualCorrectBtn = $("manual-correct-btn");
+        const manualWrongBtn = $("manual-wrong-btn");
+        const videoElement = $("input_video");
+        const canvasElement = $("output_canvas");
+        const canvasCtx = canvasElement.getContext("2d");
 
-        // --- UTILS: MESSAGE BOX ---
+        const uiQuestionNumber = $("question-number");
+        const uiTotalScore = $("total-score");
+        const uiExerciseTitle = $("exercise-title");
+        const uiWordDisplay = $("word-display");
+        const uiWordThai = $("word-thai-translation");
+        const uiWordHint = $("word-hint");
+        const uiStatusBadge = $("status-badge");
+        const uiMeterBar = $("meter-bar");
+        const uiMeterText = $("meter-status-text");
+        const uiMeterPercent = $("meter-percent-text");
+
+        if (manualMode) {
+            speechSupportNote.classList.remove("hidden");
+        }
+
+        // ------------------------------
+        // Message box
+        // ------------------------------
         function showMsgBox(title, text) {
-            document.getElementById('msg-title').innerText = title;
-            document.getElementById('msg-text').innerText = text;
-            document.getElementById('msg-box').classList.remove('hidden');
-            document.getElementById('msg-box').classList.add('flex');
+            $("msg-title").innerText = title;
+            $("msg-text").innerText = text;
+            $("msg-box").classList.remove("hidden");
+            $("msg-box").classList.add("flex");
         }
 
         function closeMsgBox() {
             sfx.click();
-            document.getElementById('msg-box').classList.add('hidden');
-            document.getElementById('msg-box').classList.remove('flex');
+            $("msg-box").classList.add("hidden");
+            $("msg-box").classList.remove("flex");
         }
 
-        // --- SPEECH RECOGNITION SETUP ---
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        let recognition;
-        let isListening = false;
-        let listeningTimeout;
-        let manualMode = false;
-        let resultLocked = false;
+        $("msg-ok-btn").addEventListener("click", closeMsgBox);
+        $("msg-ok-btn").addEventListener("touchend", (event) => {
+            event.preventDefault();
+            closeMsgBox();
+        }, { passive: false });
 
-        if (SpeechRecognition) {
-            recognition = new SpeechRecognition();
-            recognition.continuous = false;
-            recognition.interimResults = false;
-            recognition.lang = 'en-US';
+        // ------------------------------
+        // Speech recognition
+        // ------------------------------
+        function setupSpeechRecognition() {
+            if (manualMode || !SpeechRecognition) return;
 
-            recognition.onresult = (event) => {
-                if (!isListening) return;
+            try {
+                recognition = new SpeechRecognition();
+                recognition.continuous = false;
+                recognition.interimResults = false;
+                recognition.lang = "en-US";
 
-                isListening = false;
-                clearTimeout(listeningTimeout);
-
-                const transcript = event.results[0][0].transcript;
-                const confidence = event.results[0][0].confidence;
-                processVoiceResult(transcript, confidence);
-            };
-
-            recognition.onerror = (event) => {
-                if (!isListening) return;
-
-                isListening = false;
-                clearTimeout(listeningTimeout);
-
-                const fallbackErrors = ['not-allowed', 'service-not-allowed', 'audio-capture', 'network', 'aborted'];
-                if (fallbackErrors.includes(event.error)) {
-                    console.warn('Speech Recognition fallback:', event.error);
-                    startManualPracticeMode('iPad/เบราว์เซอร์นี้ไม่สามารถตรวจเสียงอัตโนมัติได้ ให้กดให้คะแนนเองหลังนักเรียนออกเสียง');
-                    return;
-                }
-
-                if (event.error === 'no-speech') {
-                    processVoiceResult("", 0);
-                } else {
-                    console.error("Speech Recognition Error:", event.error);
-                    processVoiceResult("", 0);
-                }
-            };
-
-            recognition.onend = () => {
-                if (isListening) {
+                recognition.onresult = (event) => {
+                    if (!isListening) return;
                     isListening = false;
                     clearTimeout(listeningTimeout);
-                    processVoiceResult("", 0);
-                }
-            };
-        } else {
-            manualMode = true;
-            if (speechSupportNote) {
-                speechSupportNote.classList.remove('hidden');
+
+                    const transcript = event.results?.[0]?.[0]?.transcript || "";
+                    const confidence = event.results?.[0]?.[0]?.confidence || 0;
+                    processVoiceResult(transcript, confidence);
+                };
+
+                recognition.onerror = (event) => {
+                    console.warn("Speech recognition error:", event.error);
+                    if (!isListening) return;
+                    isListening = false;
+                    clearTimeout(listeningTimeout);
+
+                    if (event.error === "not-allowed" || event.error === "service-not-allowed") {
+                        enableManualMode("ไมโครโฟนไม่พร้อม ระบบเปลี่ยนเป็นโหมดกดให้คะแนนเอง");
+                        showManualScoring();
+                    } else {
+                        processVoiceResult("", 0);
+                    }
+                };
+
+                recognition.onend = () => {
+                    if (isListening) {
+                        isListening = false;
+                        clearTimeout(listeningTimeout);
+                        processVoiceResult("", 0);
+                    }
+                };
+            } catch (err) {
+                console.warn("Cannot setup speech recognition:", err);
+                enableManualMode("ระบบตรวจเสียงไม่พร้อม เปลี่ยนเป็นโหมดกดให้คะแนนเอง");
             }
         }
 
-        // --- AR / MEDIAPIPE SETUP ---
-        function initAR() {
-            if (typeof FaceMesh === 'undefined' || typeof Camera === 'undefined') {
-                showMsgBox("โหลด AI ไม่สำเร็จ", "กรุณาตรวจสอบอินเทอร์เน็ต แล้วโหลดหน้าเว็บใหม่อีกครั้ง");
-                return;
+        // ------------------------------
+        // Camera / AR
+        // ------------------------------
+        function setCanvasSize() {
+            const container = $("webcam-container");
+            const rect = container.getBoundingClientRect();
+            const width = Math.max(320, Math.floor(rect.width || 640));
+            const height = Math.max(240, Math.floor(rect.height || 480));
+            if (canvasElement.width !== width || canvasElement.height !== height) {
+                canvasElement.width = width;
+                canvasElement.height = height;
             }
+        }
 
-            const faceMesh = new FaceMesh({
-                locateFile: (file) => {
-                    return `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`;
-                }
-            });
+        function updateCameraOverlay(text, show = true) {
+            const overlay = $("cam-loading");
+            const label = $("cam-loading-text");
+            label.innerText = text;
+            overlay.style.display = show ? "flex" : "none";
+        }
 
-            faceMesh.setOptions({
-                maxNumFaces: 1,
-                refineLandmarks: false,
-                minDetectionConfidence: 0.5,
-                minTrackingConfidence: 0.5
-            });
+        async function initAR() {
+            updateCameraOverlay("กำลังเปิดกล้อง...", true);
 
-            faceMesh.onResults(onARResults);
+            // Try MediaPipe first. If it fails on iPad, fall back to a normal camera preview.
+            if (typeof FaceMesh !== "undefined" && typeof Camera !== "undefined") {
+                try {
+                    const faceMesh = new FaceMesh({
+                        locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`
+                    });
 
-            mediapipeCamera = new Camera(videoElement, {
-                onFrame: async () => {
-                    await faceMesh.send({ image: videoElement });
-                },
-                width: 640,
-                height: 480
-            });
+                    faceMesh.setOptions({
+                        maxNumFaces: 1,
+                        refineLandmarks: false,
+                        minDetectionConfidence: 0.5,
+                        minTrackingConfidence: 0.5
+                    });
 
-            mediapipeCamera.start()
-                .then(() => {
-                    document.getElementById('cam-loading').style.display = 'none';
+                    faceMesh.onResults(onARResults);
+
+                    const camera = new Camera(videoElement, {
+                        onFrame: async () => {
+                            await faceMesh.send({ image: videoElement });
+                        },
+                        width: 640,
+                        height: 480
+                    });
+
+                    await camera.start();
                     faceTrackingReady = true;
-                })
-                .catch((err) => {
-                    console.error(err);
-                    showMsgBox("ข้อผิดพลาดของกล้อง", "ไม่สามารถเข้าถึงกล้องได้ กรุณาอนุญาตให้ใช้งานกล้อง และเปิดผ่าน HTTPS หรือ GitHub Pages");
-                });
+                    updateCameraOverlay("", false);
+                    return;
+                } catch (err) {
+                    console.warn("MediaPipe camera failed, using simple camera fallback:", err);
+                }
+            }
+
+            await initSimpleCameraFallback();
         }
 
-        // --- AR DRAWING LOGIC ---
-        function onARResults(results) {
-            canvasElement.width = videoElement.videoWidth || 640;
-            canvasElement.height = videoElement.videoHeight || 480;
+        async function initSimpleCameraFallback() {
+            try {
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    throw new Error("getUserMedia not supported");
+                }
 
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: "user" },
+                    audio: false
+                });
+
+                videoElement.srcObject = stream;
+                videoElement.muted = true;
+                videoElement.setAttribute("playsinline", "");
+                await videoElement.play();
+
+                faceTrackingReady = false;
+                updateCameraOverlay("", false);
+                drawSimpleCameraLoop();
+            } catch (err) {
+                console.warn("Simple camera fallback failed:", err);
+                updateCameraOverlay("เปิดกล้องไม่ได้ แต่ยังเล่นเกมได้ในโหมดกดให้คะแนน", true);
+                drawCameraPlaceholder();
+            }
+        }
+
+        function drawSimpleCameraLoop() {
+            setCanvasSize();
             canvasCtx.save();
             canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
 
-            // Draw video frame
+            if (videoElement.readyState >= 2) {
+                canvasCtx.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
+            } else {
+                drawCameraPlaceholder(false);
+            }
+
+            if (arState === "crown") {
+                drawFloatingCrown(canvasElement.width / 2, canvasElement.height * 0.22, canvasElement.width * 0.28);
+            } else if (arState === "horns") {
+                drawFloatingHorns(canvasElement.width / 2, canvasElement.height * 0.22, canvasElement.width * 0.32);
+            }
+
+            canvasCtx.restore();
+            simpleCameraLoop = requestAnimationFrame(drawSimpleCameraLoop);
+        }
+
+        function drawCameraPlaceholder(clear = true) {
+            setCanvasSize();
+            if (clear) canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+            canvasCtx.fillStyle = "#1e293b";
+            canvasCtx.fillRect(0, 0, canvasElement.width, canvasElement.height);
+            canvasCtx.fillStyle = "#ffffff";
+            canvasCtx.font = "bold 24px Mitr, sans-serif";
+            canvasCtx.textAlign = "center";
+            canvasCtx.fillText("Camera Preview", canvasElement.width / 2, canvasElement.height / 2 - 10);
+            canvasCtx.font = "16px Mitr, sans-serif";
+            canvasCtx.fillText("เกมยังเล่นได้ด้วยปุ่มให้คะแนน", canvasElement.width / 2, canvasElement.height / 2 + 26);
+        }
+
+        function onARResults(results) {
+            const imageWidth = results.image?.width || videoElement.videoWidth || 640;
+            const imageHeight = results.image?.height || videoElement.videoHeight || 480;
+            if (canvasElement.width !== imageWidth || canvasElement.height !== imageHeight) {
+                canvasElement.width = imageWidth;
+                canvasElement.height = imageHeight;
+            }
+
+            canvasCtx.save();
+            canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
             canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
 
-            // Draw Dark Overlay if incorrect
-            if (arState === 'horns') {
+            if (arState === "horns") {
                 const gradient = canvasCtx.createRadialGradient(
                     canvasElement.width / 2,
                     canvasElement.height / 2,
@@ -541,206 +643,427 @@
                     canvasElement.height / 2,
                     canvasElement.height
                 );
-                gradient.addColorStop(0, 'rgba(0,0,0,0.2)');
-                gradient.addColorStop(1, 'rgba(50,0,0,0.8)');
+                gradient.addColorStop(0, "rgba(0,0,0,0.2)");
+                gradient.addColorStop(1, "rgba(50,0,0,0.8)");
                 canvasCtx.fillStyle = gradient;
                 canvasCtx.fillRect(0, 0, canvasElement.width, canvasElement.height);
             }
 
-            // Draw Face Props
             if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
                 const landmarks = results.multiFaceLandmarks[0];
-
-                // Get Forehead Point (Landmark 10)
                 const forehead = landmarks[10];
-                const x = forehead.x * canvasElement.width;
-                const y = forehead.y * canvasElement.height;
-
-                // Estimate Face Width (Distance between left edge 234 and right edge 454)
                 const leftPoint = landmarks[234];
                 const rightPoint = landmarks[454];
+                const x = forehead.x * canvasElement.width;
+                const y = forehead.y * canvasElement.height;
                 const faceWidth = Math.abs(rightPoint.x - leftPoint.x) * canvasElement.width;
 
-                if (arState === 'crown') {
+                if (arState === "crown") {
                     drawCrown(x, y, faceWidth * 1.2);
-                } else if (arState === 'horns') {
+                } else if (arState === "horns") {
                     drawHorns(x, y, faceWidth * 1.3);
                 }
+            } else {
+                if (arState === "crown") drawFloatingCrown(canvasElement.width / 2, canvasElement.height * 0.22, canvasElement.width * 0.28);
+                if (arState === "horns") drawFloatingHorns(canvasElement.width / 2, canvasElement.height * 0.22, canvasElement.width * 0.32);
             }
 
             canvasCtx.restore();
         }
 
         function drawCrown(x, y, width) {
-            const h = width * 0.6;
-            canvasCtx.save();
-            canvasCtx.translate(x, y - h * 0.8);
+            drawFloatingCrown(x, y - width * 0.48, width);
+        }
 
-            canvasCtx.fillStyle = '#FFD700';
-            canvasCtx.strokeStyle = '#B8860B';
-            canvasCtx.lineWidth = 3;
-            canvasCtx.lineJoin = 'round';
+        function drawFloatingCrown(x, y, width) {
+            const h = width * 0.55;
+            canvasCtx.save();
+            canvasCtx.translate(x, y);
+            canvasCtx.fillStyle = "#FFD700";
+            canvasCtx.strokeStyle = "#B8860B";
+            canvasCtx.lineWidth = Math.max(2, width * 0.025);
+            canvasCtx.lineJoin = "round";
 
             canvasCtx.beginPath();
             canvasCtx.moveTo(-width / 2, h);
-            canvasCtx.lineTo(-width / 2, 0);
-            canvasCtx.lineTo(-width / 4, h / 2);
-            canvasCtx.lineTo(0, -h / 4);
-            canvasCtx.lineTo(width / 4, h / 2);
-            canvasCtx.lineTo(width / 2, 0);
+            canvasCtx.lineTo(-width / 2, h * 0.15);
+            canvasCtx.lineTo(-width / 4, h * 0.55);
+            canvasCtx.lineTo(0, -h * 0.18);
+            canvasCtx.lineTo(width / 4, h * 0.55);
+            canvasCtx.lineTo(width / 2, h * 0.15);
             canvasCtx.lineTo(width / 2, h);
             canvasCtx.closePath();
-
             canvasCtx.fill();
             canvasCtx.stroke();
 
-            // Jewels
-            canvasCtx.fillStyle = '#FF3366';
+            canvasCtx.fillStyle = "#FF3366";
             canvasCtx.beginPath();
-            canvasCtx.arc(0, h / 2, width / 15, 0, Math.PI * 2);
+            canvasCtx.arc(0, h * 0.52, width / 15, 0, Math.PI * 2);
             canvasCtx.fill();
 
-            canvasCtx.fillStyle = '#33CCFF';
+            canvasCtx.fillStyle = "#33CCFF";
             canvasCtx.beginPath();
-            canvasCtx.arc(-width / 3, h / 1.5, width / 20, 0, Math.PI * 2);
+            canvasCtx.arc(-width / 3, h * 0.68, width / 20, 0, Math.PI * 2);
             canvasCtx.fill();
-
             canvasCtx.beginPath();
-            canvasCtx.arc(width / 3, h / 1.5, width / 20, 0, Math.PI * 2);
+            canvasCtx.arc(width / 3, h * 0.68, width / 20, 0, Math.PI * 2);
             canvasCtx.fill();
-
             canvasCtx.restore();
         }
 
         function drawHorns(x, y, width) {
+            drawFloatingHorns(x, y - width * 0.18, width);
+        }
+
+        function drawFloatingHorns(x, y, width) {
             const h = width * 0.5;
             canvasCtx.save();
-            canvasCtx.translate(x, y - h * 0.3);
+            canvasCtx.translate(x, y);
+            canvasCtx.fillStyle = "#DC2626";
+            canvasCtx.strokeStyle = "#7F1D1D";
+            canvasCtx.lineWidth = Math.max(2, width * 0.018);
 
-            canvasCtx.fillStyle = '#DC2626';
-            canvasCtx.strokeStyle = '#7F1D1D';
-            canvasCtx.lineWidth = 2;
-
-            // Left Horn
             canvasCtx.beginPath();
-            canvasCtx.moveTo(-width / 4, 0);
-            canvasCtx.quadraticCurveTo(-width / 2, -h, -width / 1.5, -h * 1.2);
-            canvasCtx.quadraticCurveTo(-width / 3, -h * 0.8, -width / 6, 0);
+            canvasCtx.moveTo(-width / 4, h * 0.3);
+            canvasCtx.quadraticCurveTo(-width / 2, -h * 0.55, -width / 1.55, -h * 0.72);
+            canvasCtx.quadraticCurveTo(-width / 3, -h * 0.35, -width / 8, h * 0.3);
             canvasCtx.closePath();
             canvasCtx.fill();
             canvasCtx.stroke();
 
-            // Right Horn
             canvasCtx.beginPath();
-            canvasCtx.moveTo(width / 4, 0);
-            canvasCtx.quadraticCurveTo(width / 2, -h, width / 1.5, -h * 1.2);
-            canvasCtx.quadraticCurveTo(width / 3, -h * 0.8, width / 6, 0);
+            canvasCtx.moveTo(width / 4, h * 0.3);
+            canvasCtx.quadraticCurveTo(width / 2, -h * 0.55, width / 1.55, -h * 0.72);
+            canvasCtx.quadraticCurveTo(width / 3, -h * 0.35, width / 8, h * 0.3);
             canvasCtx.closePath();
             canvasCtx.fill();
             canvasCtx.stroke();
-
             canvasCtx.restore();
         }
 
+        // ------------------------------
+        // Game logic
+        // ------------------------------
+        function bindTap(element, handler) {
+            let lastTouch = 0;
 
-        // --- EXERCISE SELECTION ---
-        function selectExercise(exerciseKey) {
-            if (!exercises[exerciseKey]) return;
+            element.addEventListener("touchend", (event) => {
+                lastTouch = Date.now();
+                event.preventDefault();
+                handler(event);
+            }, { passive: false });
 
-            selectedExerciseKey = exerciseKey;
-            wordsList = exercises[selectedExerciseKey].words;
-
-            document.querySelectorAll('[data-exercise]').forEach((card) => {
-                card.classList.toggle('selected', card.dataset.exercise === exerciseKey);
+            element.addEventListener("pointerup", (event) => {
+                if (Date.now() - lastTouch < 500) return;
+                handler(event);
             });
 
-            const selectedName = document.getElementById('selected-exercise-name');
-            if (selectedName) {
-                selectedName.innerText = exercises[selectedExerciseKey].title;
-            }
+            element.addEventListener("click", (event) => {
+                if (Date.now() - lastTouch < 500) return;
+                handler(event);
+            });
         }
 
-        document.querySelectorAll('[data-exercise]').forEach((card) => {
-            card.addEventListener('click', () => {
-                sfx.init();
-                sfx.click();
-                selectExercise(card.dataset.exercise);
-            });
-
-            card.addEventListener('keydown', (event) => {
-                if (event.key === 'Enter' || event.key === ' ') {
-                    event.preventDefault();
-                    sfx.init();
-                    sfx.click();
-                    selectExercise(card.dataset.exercise);
-                }
-            });
+        bindTap(startBtn, beginGame);
+        bindTap(restartBtn, () => {
+            sfx.click();
+            window.location.reload();
         });
-
-        selectExercise(selectedExerciseKey);
-
-        // --- GAME LOGIC ---
-        let gameStarted = false;
-        const startBtn = document.getElementById('start-btn');
+        bindTap(manualCorrectBtn, () => processManualResult(true));
+        bindTap(manualWrongBtn, () => processManualResult(false));
 
         function beginGame(event) {
-            if (event) {
-                event.preventDefault();
-                event.stopPropagation();
-            }
             if (gameStarted) return;
             gameStarted = true;
 
             sfx.init();
             sfx.click();
+            setupSpeechRecognition();
 
             startBtn.disabled = true;
-            startBtn.classList.remove('pulse-anim');
-            startBtn.innerText = 'กำลังเริ่มเกม...';
-
-            document.getElementById('start-screen').style.opacity = '0';
+            startBtn.innerText = "กำลังเริ่มเกม...";
+            startScreen.style.opacity = "0";
 
             setTimeout(() => {
-                document.getElementById('start-screen').style.display = 'none';
-                document.getElementById('game-container').style.opacity = '1';
+                startScreen.style.display = "none";
+                gameContainer.style.opacity = "1";
                 initAR();
                 startGame();
-            }, 350);
+            }, 250);
         }
-
-        if (window.PointerEvent) {
-            startBtn.addEventListener('pointerup', beginGame, { passive: false });
-        } else {
-            startBtn.addEventListener('touchend', beginGame, { passive: false });
-        }
-        startBtn.addEventListener('click', beginGame);
 
         function startGame() {
-            wordsList = exercises[selectedExerciseKey].words;
             currentWordIndex = 0;
             score = 0;
-            uiExerciseTitle.innerText = exercises[selectedExerciseKey].shortTitle;
+            gameState = "ready";
+            arState = "none";
+            uiExerciseTitle.innerText = exerciseTitle;
             updateScoreUI();
             nextQuestion();
         }
 
         function nextQuestion() {
+            manualControls.classList.add("hidden");
+
             if (currentWordIndex >= wordsList.length) {
                 showEndScreen();
                 return;
             }
 
-            gameState = 'countdown';
-            arState = 'none';
+            gameState = "countdown";
+            arState = "none";
 
             const currentWord = wordsList[currentWordIndex];
-
             uiQuestionNumber.innerText = `${currentWordIndex + 1} / ${wordsList.length}`;
             uiWordDisplay.innerText = currentWord.en.toUpperCase();
-            uiWordThai.innerText = currentWord.sound ? `${currentWord.th} • เสียงท้าย ${currentWord.sound}` : `(${currentWord.th})`;
-            uiWordHint.innerText = currentWord.hint || exercises[selectedExerciseKey].hint;
+            uiWordThai.innerText = `${currentWord.th} • เสียงท้าย ${currentWord.sound}`;
+            uiWordHint.innerText = currentWord.hint;
 
-            uiWordDisplay.classList.remove('text-green-500', 'text-red-500');
-            uiWordDisplay.classList.add('text-slate-800');
+            uiWordDisplay.classList.remove("text-green-500", "text-red-500");
+            uiWordDisplay.classList.add("text-slate-800");
+            resetMeterUI();
 
-            re
+            let countdown = 3;
+            updateStatusBadge(`เตรียมตัว... ${countdown}`, "bg-blue-100", "text-blue-600", "border-blue-200");
+            sfx.tick();
+
+            const countInterval = setInterval(() => {
+                countdown--;
+                if (countdown > 0) {
+                    sfx.tick();
+                    updateStatusBadge(`เตรียมตัว... ${countdown}`, "bg-blue-100", "text-blue-600", "border-blue-200");
+                } else {
+                    clearInterval(countInterval);
+                    sfx.go();
+                    startListening();
+                }
+            }, 900);
+        }
+
+        function startListening() {
+            if (manualMode || !recognition) {
+                showManualScoring();
+                return;
+            }
+
+            gameState = "listening";
+            updateStatusBadge("🎙️ พูดเลย!", "bg-yellow-100", "text-yellow-600", "border-yellow-200");
+            uiMeterText.innerText = "กำลังฟังเสียงของคุณ...";
+            uiMeterText.style.color = "#854d0e";
+            uiMeterBar.style.background = "linear-gradient(90deg, #fef08a, #facc15)";
+            uiMeterBar.style.width = "100%";
+            uiMeterBar.classList.add("pulse-anim");
+
+            try {
+                recognition.start();
+                isListening = true;
+
+                listeningTimeout = setTimeout(() => {
+                    if (isListening) {
+                        recognition.stop();
+                        isListening = false;
+                        processVoiceResult("", 0);
+                    }
+                }, 5000);
+            } catch (err) {
+                console.warn("Cannot start recognition:", err);
+                isListening = false;
+                enableManualMode("ระบบตรวจเสียงเริ่มไม่ได้ เปลี่ยนเป็นโหมดกดให้คะแนนเอง");
+                showManualScoring();
+            }
+        }
+
+        function enableManualMode(message) {
+            manualMode = true;
+            speechSupportNote.classList.remove("hidden");
+            if (message) {
+                uiMeterText.innerText = message;
+            }
+        }
+
+        function showManualScoring() {
+            gameState = "manual";
+            updateStatusBadge("👩‍🏫 โหมด iPad", "bg-amber-100", "text-amber-700", "border-amber-200");
+            uiMeterText.innerText = "ให้นักเรียนอ่านออกเสียง แล้วครูกดให้คะแนน";
+            uiMeterText.style.color = "#854d0e";
+            uiMeterBar.classList.remove("pulse-anim");
+            uiMeterBar.style.background = "linear-gradient(90deg, #fef08a, #facc15)";
+            uiMeterBar.style.width = "100%";
+            uiMeterPercent.innerText = "Manual";
+            manualControls.classList.remove("hidden");
+        }
+
+        function processManualResult(isCorrect) {
+            if (gameState !== "manual") return;
+            manualControls.classList.add("hidden");
+            const percentage = isCorrect ? 100 : 40;
+            processScoredResult(percentage, isCorrect ? "ครูกดผ่าน" : "ครูกดยังไม่ผ่าน");
+        }
+
+        function normalizeWord(text) {
+            return (text || "").toLowerCase().replace(/[^a-z]/g, "");
+        }
+
+        function calculateSimilarityScore(spoken, target, confidence) {
+            const spokenClean = normalizeWord(spoken);
+            const targetClean = normalizeWord(target);
+            if (!spokenClean) return 0;
+
+            if (spokenClean === targetClean) {
+                const safeConfidence = confidence > 0 ? confidence : 0.9;
+                return Math.min(100, Math.floor(82 + safeConfidence * 18));
+            }
+
+            if (spokenClean.includes(targetClean) || targetClean.includes(spokenClean)) {
+                return 70;
+            }
+
+            const longer = spokenClean.length > targetClean.length ? spokenClean : targetClean;
+            const shorter = spokenClean.length > targetClean.length ? targetClean : spokenClean;
+            let matchCount = 0;
+            for (let i = 0; i < shorter.length; i++) {
+                if (longer.includes(shorter[i])) matchCount++;
+            }
+            return Math.min(79, Math.floor((matchCount / longer.length) * 100));
+        }
+
+        function processVoiceResult(transcript, confidence) {
+            uiMeterBar.classList.remove("pulse-anim");
+            gameState = "result";
+
+            if (!transcript || !transcript.trim()) {
+                sfx.warning();
+                uiMeterBar.style.background = "linear-gradient(90deg, #fef08a, #facc15)";
+                uiMeterBar.style.width = "100%";
+                uiMeterText.innerText = "ไม่ได้ยินเสียงเลย ลองพูดใหม่อีกครั้งนะ!";
+                uiMeterText.style.color = "#854d0e";
+                updateStatusBadge("⚠️ ไม่ได้ยินเสียง", "bg-yellow-100", "text-yellow-700", "border-yellow-200");
+
+                setTimeout(() => {
+                    nextQuestion();
+                }, 2200);
+                return;
+            }
+
+            const targetWord = wordsList[currentWordIndex].en;
+            const percentage = calculateSimilarityScore(transcript, targetWord, confidence);
+            processScoredResult(percentage, transcript);
+        }
+
+        function processScoredResult(percentage, displayText) {
+            uiMeterBar.classList.remove("pulse-anim");
+            gameState = "result";
+
+            const finalPercent = Math.max(0, Math.min(100, Math.floor(percentage)));
+            const isCorrect = finalPercent >= 80;
+            uiMeterPercent.innerText = `${finalPercent}%`;
+            uiMeterBar.style.width = `${finalPercent}%`;
+
+            uiWordDisplay.classList.remove("text-green-500", "text-red-500", "text-slate-800");
+
+            if (isCorrect) {
+                sfx.correct();
+                uiMeterBar.style.background = "linear-gradient(90deg, #86efac, #22c55e)";
+                uiMeterText.innerText = `เยี่ยมมาก! (${displayText})`;
+                uiMeterText.style.color = "#14532d";
+                updateStatusBadge("✅ ถูกต้อง!", "bg-green-100", "text-green-600", "border-green-200");
+                uiWordDisplay.classList.add("text-green-500");
+                score++;
+                updateScoreUI();
+                arState = "crown";
+                triggerFireworks();
+            } else {
+                sfx.wrong();
+                uiMeterBar.style.background = "linear-gradient(90deg, #fca5a5, #ef4444)";
+                uiMeterText.innerText = `ยังไม่ผ่าน (${displayText})`;
+                uiMeterText.style.color = "#7f1d1d";
+                updateStatusBadge("❌ พยายามใหม่นะ", "bg-red-100", "text-red-600", "border-red-200");
+                uiWordDisplay.classList.add("text-red-500");
+                arState = "horns";
+            }
+
+            setTimeout(() => {
+                currentWordIndex++;
+                nextQuestion();
+            }, 2500);
+        }
+
+        // ------------------------------
+        // UI helpers
+        // ------------------------------
+        function updateScoreUI() {
+            uiTotalScore.innerText = score;
+            uiTotalScore.classList.remove("bounce-anim");
+            void uiTotalScore.offsetWidth;
+            uiTotalScore.classList.add("bounce-anim");
+        }
+
+        function updateStatusBadge(text, bgClass, textClass, borderClass) {
+            uiStatusBadge.className = `absolute top-4 md:top-6 px-4 py-1 md:px-6 md:py-2 rounded-full font-bold text-sm md:text-lg shadow-sm border transition-all duration-300 z-10 ${bgClass} ${textClass} ${borderClass}`;
+            uiStatusBadge.innerText = text;
+        }
+
+        function resetMeterUI() {
+            uiMeterBar.style.width = "0%";
+            uiMeterBar.style.background = "linear-gradient(90deg, #e2e8f0, #cbd5e1)";
+            uiMeterBar.classList.remove("pulse-anim");
+            uiMeterText.innerText = manualMode ? "โหมด iPad พร้อมให้ครูกดคะแนน" : "รอสัญญาณ...";
+            uiMeterText.style.color = "#475569";
+            uiMeterPercent.innerText = "0%";
+        }
+
+        function triggerFireworks() {
+            if (typeof confetti === "undefined") return;
+            const duration = 1600;
+            const end = Date.now() + duration;
+
+            (function frame() {
+                confetti({
+                    particleCount: 5,
+                    angle: 60,
+                    spread: 55,
+                    origin: { x: 0 },
+                    colors: ["#ff0000", "#00ff00", "#0000ff", "#ffff00", "#ff00ff"]
+                });
+                confetti({
+                    particleCount: 5,
+                    angle: 120,
+                    spread: 55,
+                    origin: { x: 1 },
+                    colors: ["#ff0000", "#00ff00", "#0000ff", "#ffff00", "#ff00ff"]
+                });
+
+                if (Date.now() < end) {
+                    requestAnimationFrame(frame);
+                }
+            })();
+        }
+
+        function showEndScreen() {
+            gameState = "end";
+            manualControls.classList.add("hidden");
+            $("final-score-text").innerText = `${score}/${wordsList.length}`;
+            $("end-screen").classList.remove("hidden");
+            $("end-screen").classList.add("flex");
+
+            setTimeout(() => {
+                const passingScore = Math.ceil(wordsList.length * 0.8);
+                if (score >= passingScore) {
+                    sfx.fanfare();
+                    triggerFireworks();
+                    setTimeout(triggerFireworks, 900);
+                } else {
+                    sfx.gameOver();
+                }
+            }, 100);
+        }
+
+        window.addEventListener("resize", () => {
+            setCanvasSize();
+        });
+
+        // Initial canvas placeholder
+        drawCameraPlaceholder();
+    </script>
+</body>
+</html>
