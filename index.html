@@ -132,6 +132,31 @@
             padding-bottom: env(safe-area-inset-bottom);
         }
 
+        /* ทำให้คำศัพท์ออกเสียงย่อ/ขยายพอดีกับกรอบทุกอุปกรณ์ */
+        #word-display {
+            width: 100%;
+            max-width: 100%;
+            padding-inline: 0.25rem;
+            white-space: nowrap;
+            overflow: visible;
+            text-wrap: nowrap;
+            letter-spacing: clamp(0.015em, 0.35vw, 0.09em);
+            font-size: clamp(2.6rem, 9vw, 5.8rem);
+            line-height: 0.95;
+        }
+
+        @media (min-width: 768px) {
+            #word-display {
+                font-size: clamp(3.4rem, 6.2vw, 6.2rem);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            #word-display {
+                font-size: clamp(3.8rem, 5.8vw, 6.6rem);
+            }
+        }
+
         @media (max-width: 767px) {
             body {
                 overflow-y: auto;
@@ -143,7 +168,7 @@
             }
 
             #word-display {
-                font-size: clamp(3rem, 17vw, 5.2rem);
+                font-size: clamp(2.4rem, 14vw, 4.8rem);
             }
         }
     </style>
@@ -427,6 +452,50 @@
         const uiMeterText = $("meter-status-text");
         const uiMeterPercent = $("meter-percent-text");
 
+        function fitWordDisplayToFrame() {
+            if (!uiWordDisplay) return;
+
+            const parent = uiWordDisplay.parentElement;
+            const parentWidth = parent ? parent.clientWidth : uiWordDisplay.clientWidth;
+            const maxWidth = Math.max(220, parentWidth - 36);
+
+            uiWordDisplay.style.whiteSpace = "nowrap";
+            uiWordDisplay.style.wordBreak = "normal";
+            uiWordDisplay.style.overflowWrap = "normal";
+            uiWordDisplay.style.maxWidth = "100%";
+            uiWordDisplay.style.letterSpacing = "0.06em";
+
+            const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+            let size = vw < 768 ? 78 : vw < 1024 ? 92 : 106;
+            const minSize = vw < 768 ? 38 : 46;
+
+            uiWordDisplay.style.fontSize = `${size}px`;
+
+            let guard = 0;
+            while (uiWordDisplay.scrollWidth > maxWidth && size > minSize && guard < 80) {
+                size -= 2;
+                uiWordDisplay.style.fontSize = `${size}px`;
+                guard++;
+            }
+
+            if (uiWordDisplay.scrollWidth > maxWidth) {
+                uiWordDisplay.style.letterSpacing = "0.02em";
+                while (uiWordDisplay.scrollWidth > maxWidth && size > 32 && guard < 120) {
+                    size -= 1;
+                    uiWordDisplay.style.fontSize = `${size}px`;
+                    guard++;
+                }
+            }
+        }
+
+        window.addEventListener("resize", () => {
+            window.requestAnimationFrame(fitWordDisplayToFrame);
+        });
+
+        window.addEventListener("orientationchange", () => {
+            setTimeout(fitWordDisplayToFrame, 300);
+        });
+
         if (!SpeechRecognition) {
             speechSupportNote.classList.remove("hidden");
         }
@@ -599,7 +668,7 @@
                 drawSimpleCameraLoop();
             } catch (err) {
                 console.warn("Simple camera fallback failed:", err);
-                updateCameraOverlay("เปิดกล้องไม่ได้ แต่ยังใช้ AI ตรวจเสียงเล่นต่อได้", true);
+                updateCameraOverlay("เปิดกล้องไม่ได้ แต่ยังเล่นเกมได้ในโหมดกดให้คะแนน", true);
                 drawCameraPlaceholder();
             }
         }
@@ -788,17 +857,6 @@
         bindTap(manualCorrectBtn, () => processManualResult(true));
         bindTap(manualWrongBtn, () => processManualResult(false));
 
-
-        async function warmUpMicrophonePermission() {
-            try {
-                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return;
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
-                stream.getTracks().forEach(track => track.stop());
-            } catch (err) {
-                console.warn("Microphone warm-up failed:", err);
-            }
-        }
-
         function beginGame(event) {
             if (gameStarted) return;
             gameStarted = true;
@@ -806,10 +864,9 @@
             sfx.init();
             sfx.click();
             setupSpeechRecognition();
-            warmUpMicrophonePermission();
 
             startBtn.disabled = true;
-            startBtn.innerText = "กำลังเปิด AI ตรวจเสียง...";
+            startBtn.innerText = "กำลังเริ่มเกม...";
             startScreen.style.opacity = "0";
 
             setTimeout(() => {
@@ -844,6 +901,8 @@
             const currentWord = wordsList[currentWordIndex];
             uiQuestionNumber.innerText = `${currentWordIndex + 1} / ${wordsList.length}`;
             uiWordDisplay.innerText = currentWord.en.toUpperCase();
+            fitWordDisplayToFrame();
+            window.requestAnimationFrame(fitWordDisplayToFrame);
             uiWordThai.innerText = `${currentWord.th} • เสียงท้าย ${currentWord.sound}`;
             uiWordHint.innerText = currentWord.hint;
 
